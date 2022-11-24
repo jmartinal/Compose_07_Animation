@@ -374,10 +374,12 @@ private fun TopicRow(topic: String, expanded: Boolean, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .animateContentSize(animationSpec = spring(
-                    dampingRatio = 0.75F,
-                    stiffness = Spring.StiffnessLow
-                ))
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = 0.75F,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
         ) {
             Row {
                 Icon(
@@ -456,10 +458,33 @@ private fun HomeTabIndicator(
     tabPositions: List<TabPosition>,
     tabPage: TabPage
 ) {
-    // TODO 4: Animate these value changes.
-    val indicatorLeft = tabPositions[tabPage.ordinal].left
-    val indicatorRight = tabPositions[tabPage.ordinal].right
-    val color = if (tabPage == TabPage.Home) Purple700 else Green800
+    // DONE 4: Animate these value changes.
+    val transition = updateTransition(targetState = tabPage, label = "Tab indicator")
+    val indicatorLeft by transition.animateDp(
+        label = "Left",
+        transitionSpec = {
+            if (TabPage.Home isTransitioningTo TabPage.Work)
+                spring(stiffness = Spring.StiffnessVeryLow)
+            else
+                spring(stiffness = Spring.StiffnessMedium)
+        }
+    ) { page ->
+        tabPositions[page.ordinal].left
+    }
+    val indicatorRight by transition.animateDp(
+        label = "Right",
+        transitionSpec = {
+            if (TabPage.Work isTransitioningTo TabPage.Home)
+                spring(stiffness = Spring.StiffnessVeryLow)
+            else
+                spring(stiffness = Spring.StiffnessMedium)
+        }
+    ) { page ->
+        tabPositions[page.ordinal].right
+    }
+    val color by transition.animateColor(label = "Border color") { page ->
+        if (page == TabPage.Home) Purple700 else Green800
+    }
     Box(
         Modifier
             .fillMaxSize()
